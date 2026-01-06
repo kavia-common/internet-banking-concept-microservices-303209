@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: utility-payment-service
+  namespace: internet-banking
+  labels:
+    app: utility-payment-service
+    tier: business
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8085
+    targetPort: 8085
+    protocol: TCP
+    name: http
+  selector:
+    app: utility-payment-service

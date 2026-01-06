@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: internet-banking-common-config
+  namespace: internet-banking
+data:
+  # Common environment variables shared across services
+  SPRING_PROFILES_ACTIVE: "production"
+  
+  # Service discovery - Eureka configuration
+  EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://service-registry:8081/eureka"
+  EUREKA_INSTANCE_PREFER_IP_ADDRESS: "false"
+  
+  # Config server URI
+  SPRING_CLOUD_CONFIG_URI: "http://config-server:8090"
+  
+  # Actuator endpoints
+  MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "health,info,metrics,prometheus"
+  MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS: "always"
+  
+  # TODO: Update these placeholders with actual values
+  # Logging level
+  LOGGING_LEVEL_ROOT: "INFO"
+  LOGGING_LEVEL_COM_JAVATODEV: "DEBUG"

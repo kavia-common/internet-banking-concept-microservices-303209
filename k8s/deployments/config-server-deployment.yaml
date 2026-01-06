@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: config-server
+  namespace: internet-banking
+  labels:
+    app: config-server
+    tier: infrastructure
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: config-server
+  template:
+    metadata:
+      labels:
+        app: config-server
+        tier: infrastructure
+    spec:
+      containers:
+      - name: config-server
+        # TODO: Update with actual image after building and pushing to registry
+        image: ghcr.io/org/config-server:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8090
+          name: http
+          protocol: TCP
+        env:
+        - name: SERVER_PORT
+          value: "8090"
+        - name: SPRING_CLOUD_CONFIG_SERVER_GIT_URI
+          value: "https://github.com/javatodev/internet-banking-configurations.git"
+        - name: SPRING_CLOUD_CONFIG_SERVER_GIT_SEARCH_PATHS
+          value: "configuration"
+        - name: SPRING_CLOUD_CONFIG_SERVER_GIT_DEFAULT_LABEL
+          value: "main"
+        envFrom:
+        - configMapRef:
+            name: internet-banking-common-config
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8090
+          initialDelaySeconds: 90
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8090
+          initialDelaySeconds: 60
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3

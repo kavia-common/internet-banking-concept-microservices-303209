@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: core-banking-service
+  namespace: internet-banking
+  labels:
+    app: core-banking-service
+    tier: business
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8083
+    targetPort: 8083
+    protocol: TCP
+    name: http
+  selector:
+    app: core-banking-service

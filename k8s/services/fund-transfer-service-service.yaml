@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: fund-transfer-service
+  namespace: internet-banking
+  labels:
+    app: fund-transfer-service
+    tier: business
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8084
+    targetPort: 8084
+    protocol: TCP
+    name: http
+  selector:
+    app: fund-transfer-service

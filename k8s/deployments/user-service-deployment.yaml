@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-service
+  namespace: internet-banking
+  labels:
+    app: user-service
+    tier: business
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: user-service
+  template:
+    metadata:
+      labels:
+        app: user-service
+        tier: business
+    spec:
+      containers:
+      - name: user-service
+        # TODO: Update with actual image after building and pushing to registry
+        image: ghcr.io/org/user-service:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8082
+          name: http
+          protocol: TCP
+        env:
+        - name: SERVER_PORT
+          value: "8082"
+        - name: SPRING_APPLICATION_NAME
+          value: "internet-banking-user-service"
+        - name: SPRING_CLOUD_CONFIG_URI
+          value: "http://config-server:8090"
+        - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+          value: "http://service-registry:8081/eureka"
+        - name: EUREKA_INSTANCE_PREFER_IP_ADDRESS
+          value: "false"
+        - name: EUREKA_INSTANCE_HOSTNAME
+          value: "user-service"
+        # Database configuration
+        - name: SPRING_DATASOURCE_URL
+          value: "jdbc:mysql://mysql:3306/banking_users?useSSL=false&allowPublicKeyRetrieval=true"
+        - name: SPRING_DATASOURCE_USERNAME
+          value: "bankuser"
+        - name: SPRING_DATASOURCE_PASSWORD
+          value: "bankpass"
+          # TODO: Move to Secret and reference it
+        # Keycloak configuration
+        - name: KEYCLOAK_AUTH_SERVER_URL
+          value: "http://keycloak:8080/auth"
+        - name: KEYCLOAK_REALM
+          value: "banking"
+        - name: KEYCLOAK_RESOURCE
+          value: "banking-client"
+        - name: KEYCLOAK_CREDENTIALS_SECRET
+          value: "secret"
+          # TODO: Move to Secret and reference it
+        # Zipkin tracing
+        - name: SPRING_ZIPKIN_BASE_URL
+          value: "http://zipkin:9411"
+        envFrom:
+        - configMapRef:
+            name: internet-banking-common-config
+        resources:
+          requests:
+            memory: "768Mi"
+            cpu: "500m"
+          limits:
+            memory: "1536Mi"
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8082
+          initialDelaySeconds: 120
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8082
+          initialDelaySeconds: 90
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3

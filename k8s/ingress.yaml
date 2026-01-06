@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: internet-banking-ingress
+  namespace: internet-banking
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    # TODO: Configure SSL/TLS when certificates are available
+    # cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: banking.example.com  # TODO: Replace with actual domain
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: api-gateway
+            port:
+              number: 8080
+  # TODO: Uncomment and configure TLS when certificates are ready
+  # tls:
+  # - hosts:
+  #   - banking.example.com
+  #   secretName: banking-tls-secret

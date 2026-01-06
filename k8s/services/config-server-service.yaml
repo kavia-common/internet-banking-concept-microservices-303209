@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: config-server
+  namespace: internet-banking
+  labels:
+    app: config-server
+    tier: infrastructure
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8090
+    targetPort: 8090
+    protocol: TCP
+    name: http
+  selector:
+    app: config-server

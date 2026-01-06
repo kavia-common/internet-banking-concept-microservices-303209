@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak
+  namespace: internet-banking
+  labels:
+    app: keycloak
+    tier: security
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: keycloak
+  template:
+    metadata:
+      labels:
+        app: keycloak
+        tier: security
+    spec:
+      containers:
+      - name: keycloak
+        image: quay.io/keycloak/keycloak:20.0
+        args:
+        - start-dev
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        env:
+        - name: KEYCLOAK_ADMIN
+          value: "admin"
+          # TODO: Move to Secret and reference it via secretKeyRef
+        - name: KEYCLOAK_ADMIN_PASSWORD
+          value: "admin"
+          # TODO: Move to Secret and reference it via secretKeyRef
+        - name: KC_PROXY
+          value: "edge"
+        - name: KC_DB
+          value: "dev-mem"
+          # TODO: Configure external database for production
+        - name: KC_HOSTNAME_STRICT
+          value: "false"
+        - name: KC_HTTP_ENABLED
+          value: "true"
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health/live
+            port: 8080
+          initialDelaySeconds: 90
+          periodSeconds: 10
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /health/ready
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 5
+          timeoutSeconds: 3
